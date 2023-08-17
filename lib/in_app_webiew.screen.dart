@@ -30,6 +30,8 @@ class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
   String url = "";
   double progress = 0;
   final urlController = TextEditingController();
+  bool searchEnable = false;
+  bool navbarEnable = false;
 
   @override
   void initState() {
@@ -62,31 +64,60 @@ class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
           child: Column(children: <Widget>[
         Container(
           height: 30,
-          color: Colors.red,
+          color: Colors.black,
           child: Row(
+            // crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Expanded(child: Container(
+              Expanded(
+                  child: Container(
                 child: Row(
                   children: [
-                    Image(image: AssetImage("assets/images/launch_image.png"))
+                    Image(image: AssetImage("assets/images/logo.png")),
+                    Text(
+                      "万载百合商业广场",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w400),
+                    )
                   ],
                 ),
-              ))
+              )),
+              DefaultTextStyle(
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w400),
+                  child: Wrap(
+                    spacing: 5,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        "08/17",
+                      ),
+                      Text("星期四"),
+                      Text("11:27"),
+                    ],
+                  )),
+              Icon(
+                Icons.settings,
+                size: 20,
+                color: Colors.white,
+              )
             ],
           ),
         ),
-        TextField(
-          decoration: InputDecoration(prefixIcon: Icon(Icons.search)),
-          controller: urlController,
-          keyboardType: TextInputType.url,
-          onSubmitted: (value) {
-            var url = Uri.parse(value);
-            if (url.scheme.isEmpty) {
-              url = Uri.parse("https://www.baidu.com/s?wd=" + value);
-            }
-            webViewController?.loadUrl(urlRequest: URLRequest(url: url));
-          },
-        ),
+        if (searchEnable)
+          TextField(
+            decoration: InputDecoration(prefixIcon: Icon(Icons.search)),
+            controller: urlController,
+            keyboardType: TextInputType.url,
+            onSubmitted: (value) {
+              var url = Uri.parse(value);
+              if (url.scheme.isEmpty) {
+                url = Uri.parse("https://www.baidu.com/s?wd=" + value);
+              }
+              webViewController?.loadUrl(urlRequest: URLRequest(url: url));
+            },
+          )
+        else
+          Container(),
         Expanded(
           child: Stack(
             children: [
@@ -172,29 +203,32 @@ class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
             ],
           ),
         ),
-        ButtonBar(
-          alignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              child: Icon(Icons.arrow_back),
-              onPressed: () {
-                webViewController?.goBack();
-              },
-            ),
-            ElevatedButton(
-              child: Icon(Icons.arrow_forward),
-              onPressed: () {
-                webViewController?.goForward();
-              },
-            ),
-            ElevatedButton(
-              child: Icon(Icons.refresh),
-              onPressed: () {
-                webViewController?.reload();
-              },
-            ),
-          ],
-        ),
+        if (navbarEnable)
+          ButtonBar(
+            alignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ElevatedButton(
+                child: Icon(Icons.arrow_back),
+                onPressed: () {
+                  webViewController?.goBack();
+                },
+              ),
+              ElevatedButton(
+                child: Icon(Icons.arrow_forward),
+                onPressed: () {
+                  webViewController?.goForward();
+                },
+              ),
+              ElevatedButton(
+                child: Icon(Icons.refresh),
+                onPressed: () {
+                  webViewController?.reload();
+                },
+              ),
+            ],
+          )
+        else
+          Container(),
       ])),
     );
   }
