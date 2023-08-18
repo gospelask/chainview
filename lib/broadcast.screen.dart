@@ -36,6 +36,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
   late String _week;
   late String _time;
   Timer? _timer;
+  String pageTitle = "万载百合商业广场";
 
   void _formatDateTime() {
     DateTime dateTime = DateTime.now();
@@ -101,7 +102,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                             image: AssetImage(
                                 "assets/images/ic_launcher_round.webp")),
                         Text(
-                          "万载百合商业广场",
+                          pageTitle,
                           style: TextStyle(
                               color: Colors.white, fontWeight: FontWeight.w400),
                         )
@@ -206,9 +207,11 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                 },
                 onLoadStop: (controller, url) async {
                   pullToRefreshController.endRefreshing();
-                  setState(() {
+                  setState(() async {
                     this.url = url.toString();
                     urlController.text = this.url;
+                    String? title = await controller.getTitle();
+                    this.pageTitle = title != null ? title : "";
                   });
                 },
                 onLoadError: (controller, url, code, message) {
