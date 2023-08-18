@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
@@ -31,11 +32,26 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
   final urlController = TextEditingController();
   bool searchEnable = false;
   bool navbarEnable = false;
+  late String _date;
+  late String _week;
+  late String _time;
+  Timer? _timer;
+
+  void _formatDateTime() {
+    DateTime dateTime = DateTime.now();
+    _date = "${dateTime.year}/${dateTime.month}/${dateTime.day}";
+    final weeks = <String>['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
+    _week = weeks[dateTime.weekday - 1];
+    _time = "${dateTime.hour}:${dateTime.minute}:${dateTime.second}";
+  }
 
   @override
   void initState() {
     super.initState();
-
+    _formatDateTime();
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(_formatDateTime);
+    });
     pullToRefreshController = PullToRefreshController(
       options: PullToRefreshOptions(
         color: Colors.blue,
@@ -53,6 +69,9 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
 
   @override
   void dispose() {
+    if (_timer != null && _timer!.isActive) {
+      _timer!.cancel();
+    }
     super.dispose();
   }
 
@@ -99,15 +118,16 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        "08/17",
+                        _date,
                       ),
-                      Text("星期四"),
-                      Text("11:27"),
+                      Text(_week),
+                      Text(_time),
                       Material(
                         color: Colors.white.withAlpha(20),
                         child: InkWell(
                           focusColor: Colors.deepOrange.withAlpha(80),
-                          onTap: () => Navigator.pushNamed(context, "/settings"),
+                          onTap: () =>
+                              Navigator.pushNamed(context, "/settings"),
                           child: Icon(
                             Icons.settings,
                             size: 20,
@@ -117,7 +137,6 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                       ),
                     ],
                   )),
-
             ],
           ),
         ),
