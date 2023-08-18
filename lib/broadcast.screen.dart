@@ -5,13 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class InAppWebViewExampleScreen extends StatefulWidget {
+class BroadcastScreen extends StatefulWidget {
   @override
-  _InAppWebViewExampleScreenState createState() =>
-      new _InAppWebViewExampleScreenState();
+  _BroadcastScreenState createState() => new _BroadcastScreenState();
 }
 
-class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
+class _BroadcastScreenState extends State<BroadcastScreen> {
   final GlobalKey webViewKey = GlobalKey();
 
   InAppWebViewController? webViewController;
@@ -63,20 +62,31 @@ class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
       body: SafeArea(
           child: Column(children: <Widget>[
         Container(
-          height: 30,
+          height: 35,
           color: Colors.black,
           child: Row(
-            // crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                   child: Container(
+                padding: EdgeInsets.only(left: 5, right: 5),
                 child: Row(
                   children: [
-                    Image(image: AssetImage("assets/images/logo.png")),
-                    Text(
-                      "万载百合商业广场",
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w400),
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 5,
+                      children: [
+                        Image(
+                            width: 22,
+                            height: 22,
+                            image: AssetImage(
+                                "assets/images/ic_launcher_round.webp")),
+                        Text(
+                          "万载百合商业广场",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.w400),
+                        )
+                      ],
                     )
                   ],
                 ),
@@ -93,13 +103,21 @@ class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
                       ),
                       Text("星期四"),
                       Text("11:27"),
+                      Material(
+                        color: Colors.white.withAlpha(20),
+                        child: InkWell(
+                          focusColor: Colors.deepOrange.withAlpha(80),
+                          onTap: () => Navigator.pushNamed(context, "/settings"),
+                          child: Icon(
+                            Icons.settings,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ],
                   )),
-              Icon(
-                Icons.settings,
-                size: 20,
-                color: Colors.white,
-              )
+
             ],
           ),
         ),
@@ -165,7 +183,6 @@ class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
                       return NavigationActionPolicy.CANCEL;
                     }
                   }
-
                   return NavigationActionPolicy.ALLOW;
                 },
                 onLoadStop: (controller, url) async {

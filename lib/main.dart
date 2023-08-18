@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-import 'package:tv_app_broadcast/in_app_webiew.screen.dart';
+import 'package:tv_app_broadcast/broadcast.screen.dart';
+import 'package:tv_app_broadcast/settings.screen.dart';
 
 // import 'package:path_provider/path_provider.dart';
 // import 'package:permission_handler/permission_handler.dart';
@@ -49,23 +51,20 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.green),
-      home: Container(
-        // padding: EdgeInsets.all(30),
-        child: InAppWebViewExampleScreen(),
-      ),
-    );
+    return Shortcuts(
+        shortcuts: <LogicalKeySet, Intent>{
+          LogicalKeySet(LogicalKeyboardKey.select): ActivateIntent(),
+        },
+        child: MaterialApp(
+          theme: ThemeData(primarySwatch: Colors.green),
+          initialRoute: "/",
+          routes: {
+            "/": (context) {
+              return BroadcastScreen();
+            },
+            "/settings": (context) => SettingsScreen()
+          },
+        ));
   }
 }
