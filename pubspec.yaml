@@ -19,6 +19,7 @@ dependencies:
   url_launcher: 6.1.6
 
   flutter_inappwebview: 5.7.2+3
+  shared_preferences: ^2.0.18
 
 dev_dependencies:
   flutter_test:

@@ -4,7 +4,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'constants.dart';
 
 class BroadcastScreen extends StatefulWidget {
   @override
@@ -27,11 +29,12 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
       ));
 
   late PullToRefreshController pullToRefreshController;
-  String url = "";
   double progress = 0;
-  final urlController = TextEditingController();
-  bool searchEnable = false;
-  bool navbarEnable = false;
+  final _urlController = TextEditingController();
+  String _url = '';
+  String _baseUrl = "http://mgt.zhnt-x.com/rtlly//mbuy/lst";
+  bool _searchEnable = false;
+  bool _navbarEnable = false;
   late String _date;
   late String _week;
   late String _time;
@@ -46,9 +49,25 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     _time = "${dateTime.hour}:${dateTime.minute}:${dateTime.second}";
   }
 
+  void _loadUrl(value) {
+    var url = Uri.parse(value);
+    if (url.scheme.isEmpty) {
+      url = Uri.parse("https://www.baidu.com/s?wd=" + value);
+    }
+    webViewController?.loadUrl(urlRequest: URLRequest(url: url));
+  }
+
+  void _checkUrl() async {
+    if (_baseUrl.toLowerCase() !=
+        (await webViewController?.getUrl()).toString().toLowerCase()) {
+      _loadUrl(_baseUrl);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _loadData();
     _formatDateTime();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(_formatDateTime);
@@ -74,6 +93,17 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
       _timer!.cancel();
     }
     super.dispose();
+  }
+
+  Future<void> _loadData() async {
+    SharedPreferences _preferences = await SharedPreferences.getInstance();
+    setState(() {
+      _baseUrl = _preferences.getString(AppPreferencesKey.BASE_URL) ?? _baseUrl;
+      _searchEnable = _preferences.getBool(AppPreferencesKey.SEARCH_ENABLE) ??
+          _searchEnable;
+      _navbarEnable = _preferences.getBool(AppPreferencesKey.NAVBAR_ENABLE) ??
+          _navbarEnable;
+    });
   }
 
   @override
@@ -141,17 +171,13 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
             ],
           ),
         ),
-        if (searchEnable)
+        if (_searchEnable)
           TextField(
             decoration: InputDecoration(prefixIcon: Icon(Icons.search)),
-            controller: urlController,
+            controller: _urlController,
             keyboardType: TextInputType.url,
             onSubmitted: (value) {
-              var url = Uri.parse(value);
-              if (url.scheme.isEmpty) {
-                url = Uri.parse("https://www.baidu.com/s?wd=" + value);
-              }
-              webViewController?.loadUrl(urlRequest: URLRequest(url: url));
+              _loadUrl(value);
             },
           )
         else
@@ -161,19 +187,19 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
             children: [
               InAppWebView(
                 key: webViewKey,
-                initialUrlRequest: URLRequest(
-                    url: Uri.parse("http://mgt.zhnt-x.com/rtlly//mbuy/lst")),
+                initialUrlRequest: URLRequest(url: Uri.parse(_baseUrl)),
                 // initialFile: "assets/index.html",
                 initialUserScripts: UnmodifiableListView<UserScript>([]),
                 initialOptions: options,
                 pullToRefreshController: pullToRefreshController,
                 onWebViewCreated: (controller) {
                   webViewController = controller;
+                  _checkUrl();
                 },
                 onLoadStart: (controller, url) {
                   setState(() {
-                    this.url = url.toString();
-                    urlController.text = this.url;
+                    this._url = url.toString();
+                    _urlController.text = this._url;
                   });
                 },
                 androidOnPermissionRequest:
@@ -208,8 +234,8 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                 onLoadStop: (controller, url) async {
                   pullToRefreshController.endRefreshing();
                   setState(() async {
-                    this.url = url.toString();
-                    urlController.text = this.url;
+                    this._url = url.toString();
+                    _urlController.text = this._url;
                     String? title = await controller.getTitle();
                     this.pageTitle = title != null ? title : "";
                   });
@@ -223,13 +249,12 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                   }
                   setState(() {
                     this.progress = progress / 100;
-                    urlController.text = this.url;
                   });
                 },
                 onUpdateVisitedHistory: (controller, url, androidIsReload) {
                   setState(() {
-                    this.url = url.toString();
-                    urlController.text = this.url;
+                    this._url = url.toString();
+                    _urlController.text = this._url;
                   });
                 },
                 onConsoleMessage: (controller, consoleMessage) {
@@ -242,7 +267,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
             ],
           ),
         ),
-        if (navbarEnable)
+        if (_navbarEnable)
           ButtonBar(
             alignment: MainAxisAlignment.center,
             children: <Widget>[
