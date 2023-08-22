@@ -9,7 +9,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingsScreen> {
   late SharedPreferences _preferences;
-  String _baseUrl = "http://mgt.zhnt-x.com/rtlly//mbuy/lst";
+  String _baseUrl = "";
   bool _searchEnable = false;
   bool _navbarEnable = false;
 
@@ -26,7 +26,7 @@ class _SettingScreenState extends State<SettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             InkWell(
-              onTap: () {},
+              onTap: _showMyDialog,
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                 child: Column(
@@ -63,7 +63,9 @@ class _SettingScreenState extends State<SettingsScreen> {
             ),
             Divider(height: 0),
             InkWell(
-              onTap: () {},
+              onTap: () {
+                _changeSearchState(!_searchEnable);
+              },
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 child: Column(
@@ -71,7 +73,7 @@ class _SettingScreenState extends State<SettingsScreen> {
                   children: <Widget>[
                     Row(
                       children: <Widget>[
-                        Text("首页搜索栏",
+                        Text("搜索栏",
                             style: Theme.of(context)
                                 .textTheme
                                 .subtitle1
@@ -87,7 +89,7 @@ class _SettingScreenState extends State<SettingsScreen> {
                         )
                       ],
                     ),
-                    Text("是否显示首页的搜索栏",
+                    Text("是否显示搜索栏",
                         style: Theme.of(context)
                             .textTheme
                             .bodyMedium
@@ -98,7 +100,9 @@ class _SettingScreenState extends State<SettingsScreen> {
             ),
             Divider(height: 0),
             InkWell(
-              onTap: () {},
+              onTap: () {
+                _changeNavbarState(!_navbarEnable);
+              },
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                 child: Column(
@@ -106,7 +110,7 @@ class _SettingScreenState extends State<SettingsScreen> {
                   children: <Widget>[
                     Row(
                       children: <Widget>[
-                        Text("首页导航栏",
+                        Text("导航栏",
                             style: Theme.of(context)
                                 .textTheme
                                 .subtitle1
@@ -122,7 +126,7 @@ class _SettingScreenState extends State<SettingsScreen> {
                         )
                       ],
                     ),
-                    Text("是否显示首页的导航栏",
+                    Text("是否显示导航栏",
                         style: Theme.of(context)
                             .textTheme
                             .bodyMedium
@@ -132,17 +136,14 @@ class _SettingScreenState extends State<SettingsScreen> {
               ),
             ),
             Divider(height: 0),
-            InkWell(
-              onTap: () {},
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-                child: Text("版本号：v1.0.0",
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Colors.grey[400])),
-              ),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+              child: Text("版本号：v1.0.0",
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Colors.grey[400])),
             ),
             Divider(height: 0),
             Container(height: 15),
