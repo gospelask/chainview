@@ -1,12 +1,6 @@
 
 import 'dart:ui';
 
-class AppPreferencesKey {
-  static const BASE_URL = "baseUrl";
-  static const SEARCH_ENABLE = "searchEnable";
-  static const NAVBAR_ENABLE = "navbarEnable";
-}
-
 class MyColors {
   static const Color primary = Color(0xFF1976D2);
   static const Color primaryDark = Color(0xFF1565C0);

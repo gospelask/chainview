@@ -1,6 +1,8 @@
+import 'package:chain_edge/provider/global_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'constants.dart';
+import 'package:chain_edge/data/my_colors.dart';
+import 'package:chain_edge/data/share_pref.dart';
+import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -8,7 +10,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingsScreen> {
-  late SharedPreferences _preferences;
   String _baseUrl = "";
   bool _searchEnable = false;
   bool _navbarEnable = false;
@@ -18,6 +19,7 @@ class _SettingScreenState extends State<SettingsScreen> {
     super.initState();
     _loadData();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,13 +30,13 @@ class _SettingScreenState extends State<SettingsScreen> {
             InkWell(
               onTap: _showMyDialog,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Row(
                       children: <Widget>[
-                        Text("默认启动页面",
+                        Text("启动加载页面",
                             style: Theme.of(context)
                                 .textTheme
                                 .subtitle1
@@ -52,7 +54,7 @@ class _SettingScreenState extends State<SettingsScreen> {
                         SizedBox(height: 50)
                       ],
                     ),
-                    Text(_baseUrl,
+                    Text(_baseUrl.isNotEmpty ? _baseUrl : "暂未设置",
                         style: Theme.of(context)
                             .textTheme
                             .bodyMedium
@@ -104,7 +106,7 @@ class _SettingScreenState extends State<SettingsScreen> {
                 _changeNavbarState(!_navbarEnable);
               },
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -136,17 +138,68 @@ class _SettingScreenState extends State<SettingsScreen> {
               ),
             ),
             Divider(height: 0),
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-              child: Text("版本号：v1.0.0",
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: Colors.grey[400])),
+            InkWell(
+              onTap: () => context.read<GlobalNotifier>().flagClearCache(),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Text("浏览器缓存",
+                            style: Theme.of(context)
+                                .textTheme
+                                .subtitle1
+                                ?.copyWith(
+                                    color: MyColors.grey_90,
+                                    fontWeight: FontWeight.bold)),
+                        Spacer(),
+                        TextButton(
+                            onPressed: () {},
+                            child: Text("清理",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .subtitle1
+                                    ?.copyWith(color: MyColors.primary))),
+                        SizedBox(height: 50)
+                      ],
+                    ),
+                    Text("清理浏览器缓存内容：页面、图片、Cookie等",
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: Colors.grey[400])),
+                  ],
+                ),
+              ),
             ),
             Divider(height: 0),
-            Container(height: 15),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Text("Version",
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle1
+                              ?.copyWith(
+                                  color: MyColors.grey_90,
+                                  fontWeight: FontWeight.bold)),
+                      SizedBox(height: 50)
+                    ],
+                  ),
+                  Text("1.0.1",
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: Colors.grey[400])),
+                ],
+              ),
+            )
           ],
         ),
       ),
@@ -157,44 +210,40 @@ class _SettingScreenState extends State<SettingsScreen> {
             Navigator.pushNamed(context, "/");
           },
         ),
-        title: Text("中惠农通市场广播设置"),
+        title: Text("品链浏览器设置"),
       ),
     );
   }
 
   Future<void> _loadData() async {
-    _preferences = await SharedPreferences.getInstance();
-    setState((){
-      _baseUrl = _preferences.getString(AppPreferencesKey.BASE_URL) ?? _baseUrl;
-      _searchEnable =
-          _preferences.getBool(AppPreferencesKey.SEARCH_ENABLE) ?? _searchEnable;
-      _navbarEnable =
-          _preferences.getBool(AppPreferencesKey.NAVBAR_ENABLE) ?? _navbarEnable;
-    });
+    _baseUrl = (await SharedPref.getBaseUrl()) ?? _baseUrl;
+    _searchEnable = (await SharedPref.getSearchEnable()) ?? _searchEnable;
+    _navbarEnable = (await SharedPref.getNavbarEnable()) ?? _navbarEnable;
+    setState(() {});
   }
 
-  void _changeBaseUrl(String baseUrl) async {
+  void _changeBaseUrl(String baseUrl) {
     setState(() {
       _baseUrl = baseUrl;
     });
-    await _preferences.setString(AppPreferencesKey.BASE_URL, baseUrl);
+    SharedPref.setBaseUrl(baseUrl);
   }
 
-  void _changeSearchState(bool value) async {
+  void _changeSearchState(bool value) {
     setState(() {
       _searchEnable = value;
     });
-    await _preferences.setBool(AppPreferencesKey.SEARCH_ENABLE, value);
+    SharedPref.setSearchEnable(value);
   }
 
-  void _changeNavbarState(bool value) async {
+  void _changeNavbarState(bool value) {
     setState(() {
       _navbarEnable = value;
     });
-    await _preferences.setBool(AppPreferencesKey.NAVBAR_ENABLE, value);
+    SharedPref.setNavbarEnable(value);
   }
 
-  Future<void> _showMyDialog() async {
+  Future<void> _showMyDialog() {
     final _urlController = TextEditingController();
     _urlController.text = _baseUrl;
     return showDialog<void>(
@@ -202,7 +251,7 @@ class _SettingScreenState extends State<SettingsScreen> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('修改默认启动页面'),
+          title: const Text('输入URL'),
           content: TextField(
             keyboardType: TextInputType.url,
             controller: _urlController,
@@ -214,14 +263,15 @@ class _SettingScreenState extends State<SettingsScreen> {
                 Navigator.of(context).pop();
               },
             ),
-            ElevatedButton(onPressed: () {
-              _changeBaseUrl(_urlController.text);
-              Navigator.pop(context);
-            }, child: const Text('确认')),
+            ElevatedButton(
+                onPressed: () {
+                  _changeBaseUrl(_urlController.text);
+                  Navigator.pop(context);
+                },
+                child: const Text('确认')),
           ],
         );
       },
     );
   }
-
 }

@@ -1,5 +1,5 @@
-name: tv_app_broadcast
-description: 农贸市场的广播程序
+name: chain_edge
+description: 品链浏览器
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -20,6 +20,7 @@ dependencies:
 
   flutter_inappwebview: 5.7.2+3
   shared_preferences: ^2.0.18
+  provider: ^6.0.5
 
 dev_dependencies:
   flutter_test:
