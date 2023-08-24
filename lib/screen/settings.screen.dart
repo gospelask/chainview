@@ -13,6 +13,7 @@ class _SettingScreenState extends State<SettingsScreen> {
   String _baseUrl = "";
   bool _searchEnable = false;
   bool _navbarEnable = false;
+  final _urlController = TextEditingController();
 
   @override
   void initState() {
@@ -28,7 +29,9 @@ class _SettingScreenState extends State<SettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             InkWell(
-              onTap: _showMyDialog,
+              onTap: () {
+                _showEditDialog(context);
+              },
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 child: Column(
@@ -45,7 +48,9 @@ class _SettingScreenState extends State<SettingsScreen> {
                                     fontWeight: FontWeight.bold)),
                         Spacer(),
                         TextButton(
-                            onPressed: _showMyDialog,
+                            onPressed: () {
+                              _showEditDialog(context);
+                            },
                             child: Text("修改",
                                 style: Theme.of(context)
                                     .textTheme
@@ -139,7 +144,9 @@ class _SettingScreenState extends State<SettingsScreen> {
             ),
             Divider(height: 0),
             InkWell(
-              onTap: () => context.read<GlobalNotifier>().flagClearCache(),
+              onTap: () {
+                _showConfirmDialog(context);
+              },
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 child: Column(
@@ -156,7 +163,9 @@ class _SettingScreenState extends State<SettingsScreen> {
                                     fontWeight: FontWeight.bold)),
                         Spacer(),
                         TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              _showConfirmDialog(context);
+                            },
                             child: Text("清理",
                                 style: Theme.of(context)
                                     .textTheme
@@ -219,6 +228,7 @@ class _SettingScreenState extends State<SettingsScreen> {
     _baseUrl = (await SharedPref.getBaseUrl()) ?? _baseUrl;
     _searchEnable = (await SharedPref.getSearchEnable()) ?? _searchEnable;
     _navbarEnable = (await SharedPref.getNavbarEnable()) ?? _navbarEnable;
+    _urlController.text = _baseUrl;
     setState(() {});
   }
 
@@ -243,9 +253,7 @@ class _SettingScreenState extends State<SettingsScreen> {
     SharedPref.setNavbarEnable(value);
   }
 
-  Future<void> _showMyDialog() {
-    final _urlController = TextEditingController();
-    _urlController.text = _baseUrl;
+  Future<void> _showEditDialog(context) {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -266,6 +274,33 @@ class _SettingScreenState extends State<SettingsScreen> {
             ElevatedButton(
                 onPressed: () {
                   _changeBaseUrl(_urlController.text);
+                  Navigator.pop(context);
+                },
+                child: const Text('确认')),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showConfirmDialog(context) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('确认清除浏览器缓存？'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('取消'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+                autofocus: true,
+                onPressed: () {
+                  context.read<GlobalNotifier>().flagClearCache();
                   Navigator.pop(context);
                 },
                 child: const Text('确认')),
