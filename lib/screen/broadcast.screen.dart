@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
-import 'package:chain_edge/provider/global_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:chain_edge/data/share_pref.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../data/share_pref.dart';
+import '../provider/global_notifier.dart';
 
 class BroadcastScreen extends StatefulWidget {
   @override
@@ -31,8 +32,9 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
       ));
 
   late PullToRefreshController pullToRefreshController;
+  late TextEditingController _urlController;
+
   double progress = 0;
-  final _urlController = TextEditingController();
   String _url = '';
   String _baseUrl = "";
   bool _searchEnable = false;
@@ -43,11 +45,13 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
   Timer? _timer;
   String pageTitle = "万载百合商业广场";
 
-  FocusNode _settingFoucsNode = FocusNode();
+  late FocusNode _settingFocusNode;
 
   @override
   void initState() {
     super.initState();
+    _urlController = TextEditingController();
+    _settingFocusNode = FocusNode();
     _loadData();
     _formatDateTime();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -66,6 +70,16 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
         }
       },
     );
+  }
+
+  @override
+  void dispose() {
+    if (_timer != null && _timer!.isActive) {
+      _timer!.cancel();
+    }
+    _urlController.dispose();
+    _settingFocusNode.dispose();
+    super.dispose();
   }
 
   void _formatDateTime() {
@@ -108,7 +122,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
           print(event.logicalKey);
           if (event is RawKeyDownEvent) {
             if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-              _settingFoucsNode.requestFocus();
+              _settingFocusNode.requestFocus();
             } else if (event.logicalKey == LogicalKeyboardKey.tvContentsMenu ||
                 event.logicalKey == LogicalKeyboardKey.contextMenu) {
               Navigator.pushNamed(context, "/settings");
@@ -166,7 +180,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                             color: Colors.white.withAlpha(20),
                             child: InkWell(
                               focusColor: Colors.green.withAlpha(100),
-                              focusNode: _settingFoucsNode,
+                              focusNode: _settingFocusNode,
                               onTap: () =>
                                   Navigator.pushNamed(context, "/settings"),
                               child: SizedBox(
@@ -318,11 +332,4 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
         ));
   }
 
-  @override
-  void dispose() {
-    if (_timer != null && _timer!.isActive) {
-      _timer!.cancel();
-    }
-    super.dispose();
-  }
 }

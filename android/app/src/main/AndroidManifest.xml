@@ -12,6 +12,7 @@
             android:allowBackup="false"
             android:screenOrientation="landscape"
             android:label="品链浏览器"
+            android:banner="@drawable/banner"
             android:usesCleartextTraffic="true"
             android:name="${applicationName}"
             android:icon="@mipmap/ic_launcher">

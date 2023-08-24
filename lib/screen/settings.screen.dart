@@ -1,8 +1,10 @@
-import 'package:chain_edge/provider/global_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:chain_edge/data/my_colors.dart';
-import 'package:chain_edge/data/share_pref.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
+import '../data/my_colors.dart';
+import '../data/share_pref.dart';
+import '../provider/global_notifier.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -13,12 +15,25 @@ class _SettingScreenState extends State<SettingsScreen> {
   String _baseUrl = "";
   bool _searchEnable = false;
   bool _navbarEnable = false;
-  final _urlController = TextEditingController();
+  late TextEditingController _urlController;
+  late FocusNode _okBtnFocusNode;
+  late FocusNode _urlFocusNode;
 
   @override
   void initState() {
     super.initState();
+    _urlController = TextEditingController();
+    _okBtnFocusNode = FocusNode();
+    _urlFocusNode = FocusNode();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _urlController.dispose();
+    _okBtnFocusNode.dispose();
+    _urlFocusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -258,27 +273,45 @@ class _SettingScreenState extends State<SettingsScreen> {
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('输入URL'),
-          content: TextField(
-            keyboardType: TextInputType.url,
-            controller: _urlController,
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('取消'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-                onPressed: () {
+        return RawKeyboardListener(
+            focusNode: FocusNode(),
+            onKey: (event) {
+              if (event is RawKeyDownEvent) {
+                if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                  _urlFocusNode.unfocus();
+                  _okBtnFocusNode.requestFocus();
+                }
+              }
+            },
+            child: AlertDialog(
+              title: const Text('输入URL'),
+              content: TextField(
+                autofocus: true,
+                keyboardType: TextInputType.url,
+                controller: _urlController,
+                focusNode: _urlFocusNode,
+                onSubmitted: (value) {
+                  print(value);
                   _changeBaseUrl(_urlController.text);
                   Navigator.pop(context);
                 },
-                child: const Text('确认')),
-          ],
-        );
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('取消'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ElevatedButton(
+                    focusNode: _okBtnFocusNode,
+                    onPressed: () {
+                      _changeBaseUrl(_urlController.text);
+                      Navigator.pop(context);
+                    },
+                    child: const Text('确认')),
+              ],
+            ));
       },
     );
   }
