@@ -1,16 +1,8 @@
 # tv_app_broadcast
 
-农贸市场的广播程序
+品链浏览器
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+v1.0.2
++定时重新加载页面
+v1.0.4
++修改出错页面显示方式

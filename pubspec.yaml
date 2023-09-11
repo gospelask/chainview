@@ -2,7 +2,7 @@ name: chain_edge
 description: 品链浏览器
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.0+4
 
 environment:
   sdk: ">=2.14.0 <3.0.0"
@@ -37,3 +37,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/

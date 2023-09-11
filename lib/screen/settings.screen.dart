@@ -216,7 +216,7 @@ class _SettingScreenState extends State<SettingsScreen> {
                       SizedBox(height: 50)
                     ],
                   ),
-                  Text("1.0.1",
+                  Text("1.0.4",
                       style: Theme.of(context)
                           .textTheme
                           .bodyMedium

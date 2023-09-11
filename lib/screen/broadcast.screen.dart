@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,11 +30,9 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
         allowsInlineMediaPlayback: true,
       ));
 
-  late PullToRefreshController pullToRefreshController;
   late TextEditingController _urlController;
 
   double progress = 0;
-  String _url = '';
   String _baseUrl = "";
   bool _searchEnable = false;
   bool _navbarEnable = false;
@@ -44,32 +41,32 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
   late String _time;
   Timer? _timer;
   String pageTitle = "万载百合商业广场";
+  int _reloadTime = 0;
+  int _reloadWaitTime = 30;
+  bool _loading = false;
 
   late FocusNode _settingFocusNode;
 
   @override
   void initState() {
     super.initState();
+    _formatDateTime();
     _urlController = TextEditingController();
     _settingFocusNode = FocusNode();
     _loadData();
-    _formatDateTime();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(_formatDateTime);
-    });
-    pullToRefreshController = PullToRefreshController(
-      options: PullToRefreshOptions(
-        color: Colors.blue,
-      ),
-      onRefresh: () async {
-        if (Platform.isAndroid) {
-          webViewController?.reload();
-        } else if (Platform.isIOS) {
-          webViewController?.loadUrl(
-              urlRequest: URLRequest(url: await webViewController?.getUrl()));
+      if (_urlController.text=="zhnt://error" && !_loading) {
+        if (_reloadTime >= _reloadWaitTime) {
+          _reloadTime = 0;
+          _loading = true;
+          _loadUrl(_baseUrl);
+        } else {
+          _reloadTime++;
         }
-      },
-    );
+      }
+      _formatDateTime();
+      setState(() {});
+    });
   }
 
   @override
@@ -90,7 +87,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     _time = "${dateTime.hour}:${dateTime.minute}:${dateTime.second}";
   }
 
-  void _loadUrl(String value) {
+  Future<void> _loadUrl(String value) async {
     if (value.isNotEmpty) {
       var url = Uri.parse(value);
       if (url.scheme.isEmpty) {
@@ -111,6 +108,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     _baseUrl = (await SharedPref.getBaseUrl()) ?? _baseUrl;
     _searchEnable = (await SharedPref.getSearchEnable()) ?? _searchEnable;
     _navbarEnable = (await SharedPref.getNavbarEnable()) ?? _navbarEnable;
+    _checkUrl();
     setState(() {});
   }
 
@@ -216,11 +214,10 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                   Consumer<GlobalNotifier>(builder: (_, globalNotifier, child) {
                     return InAppWebView(
                       key: webViewKey,
-                      initialUrlRequest: URLRequest(url: Uri.parse(_baseUrl)),
-                      // initialFile: "assets/index.html",
+                      // initialUrlRequest: URLRequest(url: Uri.parse(_baseUrl)),
+                      // initialFile: "assets/404.html",
                       initialUserScripts: UnmodifiableListView<UserScript>([]),
                       initialOptions: options,
-                      pullToRefreshController: pullToRefreshController,
                       onWebViewCreated: (controller) {
                         webViewController = controller;
                         if (globalNotifier.needClean) {
@@ -229,9 +226,9 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                         _checkUrl();
                       },
                       onLoadStart: (controller, url) {
+                        _loading = true;
                         setState(() {
-                          this._url = url.toString();
-                          _urlController.text = this._url;
+                          _urlController.text = url.toString();
                         });
                       },
                       androidOnPermissionRequest:
@@ -265,21 +262,23 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                         return NavigationActionPolicy.ALLOW;
                       },
                       onLoadStop: (controller, url) async {
-                        pullToRefreshController.endRefreshing();
-                        setState(() async {
-                          this._url = url.toString();
-                          _urlController.text = this._url;
-                          String? title = await controller.getTitle();
-                          this.pageTitle = title != null ? title : "";
-                        });
+                        _loading = false;
+                        _urlController.text = url.toString();
+                        String? title = await controller.getTitle();
+                        this.pageTitle = title != null ? title : "";
+                        if (["file"].contains(url!.scheme) &&
+                            url.toString().endsWith("assets/error.html")) {
+                          _urlController.text = "zhnt://error";
+                        }
+                        setState(() {});
                       },
-                      onLoadError: (controller, url, code, message) {
-                        pullToRefreshController.endRefreshing();
+                      onLoadError: (controller, url, code, message) async {
+                        url = (url ?? 'about:blank') as Uri?;
+                        webViewController?.loadFile(
+                            assetFilePath: "assets/error.html");
                       },
                       onProgressChanged: (controller, progress) {
-                        if (progress == 100) {
-                          pullToRefreshController.endRefreshing();
-                        }
+                        if (progress == 100) {}
                         setState(() {
                           this.progress = progress / 100;
                         });
@@ -287,18 +286,11 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                       onUpdateVisitedHistory:
                           (controller, url, androidIsReload) {
                         setState(() {
-                          this._url = url.toString();
-                          _urlController.text = this._url;
+                          _urlController.text = url.toString();
                         });
-                      },
-                      onConsoleMessage: (controller, consoleMessage) {
-                        print(consoleMessage);
                       },
                     );
                   }),
-                  progress < 1.0
-                      ? LinearProgressIndicator(value: progress)
-                      : Container(),
                 ],
               ),
             ),
@@ -331,5 +323,4 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
           ])),
         ));
   }
-
 }
