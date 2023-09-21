@@ -10,16 +10,9 @@ import 'provider/global_notifier.dart';
 import 'screen/broadcast.screen.dart';
 import 'screen/settings.screen.dart';
 
-// import 'package:path_provider/path_provider.dart';
-// import 'package:permission_handler/permission_handler.dart';
-
-// InAppLocalhostServer localhostServer = new InAppLocalhostServer(documentRoot: 'assets');
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Permission.camera.request();
-  // await Permission.microphone.request();
-  // await Permission.storage.request();
 
   if (Platform.isAndroid) {
     await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);

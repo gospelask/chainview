@@ -1,8 +1,11 @@
-# tv_app_broadcast
+# Intro
 
-品链浏览器
+ChainView is a simple browser that runs on ANDROID TV.
 
-v1.0.2
-+定时重新加载页面
-v1.0.4
-+修改出错页面显示方式
+
+# Version
+### v1.0.2  
+- Periodic reconnection mechanism
+
+### v1.0.4  
+- Refactoring error page

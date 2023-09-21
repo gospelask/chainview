@@ -1,6 +1,5 @@
-name: chain_edge
-description: 品链浏览器
-publish_to: 'none'
+name: chainview
+description: ChainView is a simple browser that runs on ANDROID TV.
 
 version: 1.0.0+4
 
